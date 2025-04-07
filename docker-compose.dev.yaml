@@ -1,5 +1,5 @@
 services:
-  directus:
+  cms:
     image: directus/directus:11.5.1
     ports:
       - 3021:8055
