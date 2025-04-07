@@ -1,0 +1,10 @@
+services:
+  cms:
+    image: ghcr.io/edvardsen-dev/cms/strapi:latest
+    ports:
+      - 3020:1337
+    volumes:
+      - ./cms:/.tmp
+
+volumes:
+  cms-db:
