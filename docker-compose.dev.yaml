@@ -1,21 +1,15 @@
 services:
   cms:
-    image: directus/directus:11.5.1
-    ports:
-      - 8055:8055
-    volumes:
-      - database:/directus/database
-      - uploads:/directus/uploads
-      - extensions:/directus/extensions
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
-      SECRET: ${SECRET}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADNMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      DB_CLIENT: "sqlite3"
-      DB_FILENAME: "/directus/database/data.db"
-      WEBSOCKETS_ENABLED: "true"
+    ports:
+      - 8080:8080
+    volumes:
+      - data:/pb/pb_data
 
 volumes:
-  database:
-  uploads:
-  extensions:
+  data:

@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
+  build:
+    # TODO: Look at action in portfolio
+
   deploy:
     runs-on: ubuntu-latest
     env:
@@ -41,14 +44,13 @@ jobs:
         env:
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
           GHCR_USER: ${{ github.actor }}
-          SECRET: ${{ secrets.SECRET }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
+          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, ADMIN_EMAIL, ADMIN_PASSWORD
           script: |
             # Log in to GitHub Container Registry
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u $GHCR_USER --password-stdin
@@ -60,7 +62,6 @@ jobs:
             docker-compose -f docker-compose.prod.yaml Pull
 
             # Run the docker-compose file with env variables
-            SECRET=$SECRET \
             ADMIN_EMAIL=$ADMIN_EMAIL \
             ADMIN_PASSWORD=$ADMIN_PASSWORD \
             docker-compose -f docker-compose.prod.yaml up -d

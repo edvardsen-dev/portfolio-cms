@@ -1,21 +1,13 @@
 services:
   cms:
-    image: directus/directus:11.5.1
-    ports:
-      - 3021:8055
-    volumes:
-      - database:/directus/database
-      - uploads:/directus/uploads
-      - extensions:/directus/extensions
+    image: ghcr.io/edvardsen-dev/portfolio/cms:latest
     environment:
-      SECRET: ${SECRET}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      DB_CLIENT: "sqlite3"
-      DB_FILENAME: "/directus/database/data.db"
-      WEBSOCKETS_ENABLED: "true"
+    ports:
+      - 3021:8080
+    volumes:
+      - data:/pb/pb_data
 
 volumes:
-  database:
-  uploads:
-  extensions:
+  data:
