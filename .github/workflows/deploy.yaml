@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      APP_DIR: /root/apps/cms
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: APP_DIR
+          script: |
+            mkdir -p $APP_DIR
+
+      - name: Copy docker compose file to VM
+        run: |
+          scp -o StrictHostKeyChecking=no ./docker-compose.prod.yaml ${{ secrets.SSH_USER }}@${{ secrets.VM_IP }}:$APP_DIR/docker-compose.prod.yaml
+
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.1.0
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          SECRET: ${{ secrets.SECRET }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
+          script: |
+            # Log in to GitHub Container Registry
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u $GHCR_USER --password-stdin
+
+            # Change directory
+            cd $APP_DIR
+
+            # Pull lates images
+            docker-compose -f docker-compose.prod.yaml Pull
+
+            # Run the docker-compose file with env variables
+            SECRET=$SECRET \
+            ADMIN_EMAIL=$ADMIN_EMAIL \
+            ADMIN_PASSWORD=$ADMIN_PASSWORD \
+            docker-compose -f docker-compose.prod.yaml up -d
+
+            # Clean up dangling images
+            docker image prune -f
