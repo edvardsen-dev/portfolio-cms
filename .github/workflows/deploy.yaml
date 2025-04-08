@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up SSH
+      - name: Create directory if not already exists
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.VM_IP }}
