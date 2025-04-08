@@ -17,6 +17,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
       - name: Create directory if not already exists
         uses: appleboy/ssh-action@v1.1.0
         with:
@@ -27,7 +32,7 @@ jobs:
           script: |
             mkdir -p $APP_DIR
 
-      - name: Copy docker compose file to VM
+      - name: Copy docker-compose file to VM
         run: |
           scp -o StrictHostKeyChecking=no ./docker-compose.prod.yaml ${{ secrets.SSH_USER }}@${{ secrets.VM_IP }}:$APP_DIR/docker-compose.prod.yaml
 
