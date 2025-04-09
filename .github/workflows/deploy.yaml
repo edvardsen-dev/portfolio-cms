@@ -31,6 +31,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    needs: build
     env:
       APP_DIR: /root/apps/cms
 
@@ -65,12 +66,12 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           VOLUME_PATH: ${{ secrets.VOLUME_PATH }}
-          VOLUME_NAME: cms_data
+          VOLUME_NAME: "cms_data"
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, ADMIN_EMAIL, ADMIN_PASSWORD, VOLUME_PATH, VOLUME_NAMT
+          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, ADMIN_EMAIL, ADMIN_PASSWORD, VOLUME_PATH, VOLUME_NAME
           script: |
             # Log in to GitHub Container Registry
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u $GHCR_USER --password-stdin
