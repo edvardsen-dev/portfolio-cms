@@ -15,4 +15,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${VOLUME_PATH}/cms_data
+      device: ${VOLUME_PATH}/${VOLUME_NAME}

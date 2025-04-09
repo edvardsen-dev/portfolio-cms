@@ -65,11 +65,12 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           VOLUME_PATH: ${{ secrets.VOLUME_PATH }}
+          VOLUME_NAME: cms_data
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, ADMIN_EMAIL, ADMIN_PASSWORD, VOLUME_PATH
+          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, ADMIN_EMAIL, ADMIN_PASSWORD, VOLUME_PATH, VOLUME_NAMT
           script: |
             # Log in to GitHub Container Registry
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u $GHCR_USER --password-stdin
@@ -77,10 +78,14 @@ jobs:
             # Change directory
             cd $APP_DIR
 
+            # Make volume directory if not already exists
+            mkdir -p ${VOLUME_PATH}/${VOLUME_NAME}
+
             # Create/Update the .env file with environment variables
             grep -qF "ADMIN_EMAIL" .env || echo "ADMIN_EMAIL=${ADMIN_EMAIL}" >> .env
             grep -qF "ADMIN_PASSWORD" .env || echo "ADMIN_PASSWORD=${ADMIN_PASSWORD}" >> .env
             grep -qF "VOLUME_PATH" .env || echo "VOLUME_PATH=${VOLUME_PATH}" >> .env
+            grep -qF "VOLUME_NAME" .env || echo "VOLUME_NAME=${VOLUME_NAME}" >> .env
 
             # Pull lates images
             docker-compose -f docker-compose.prod.yaml Pull
