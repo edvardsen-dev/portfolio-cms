@@ -64,11 +64,12 @@ jobs:
           GHCR_USER: ${{ github.actor }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          VOLUME_PATH: ${{ secrets.VOLUME_PATH }}
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, ADMIN_EMAIL, ADMIN_PASSWORD
+          envs: APP_DIR, GHCR_TOKEN, GHCR_USER, ADMIN_EMAIL, ADMIN_PASSWORD, VOLUME_PATH
           script: |
             # Log in to GitHub Container Registry
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u $GHCR_USER --password-stdin
@@ -76,12 +77,15 @@ jobs:
             # Change directory
             cd $APP_DIR
 
+            # Create/Update the .env file with environment variables
+            grep -qF "ADMIN_EMAIL" .env || echo "ADMIN_EMAIL=${ADMIN_EMAIL}" >> .env
+            grep -qF "ADMIN_PASSWORD" .env || echo "ADMIN_PASSWORD=${ADMIN_PASSWORD}" >> .env
+            grep -qF "VOLUME_PATH" .env || echo "VOLUME_PATH=${VOLUME_PATH}" >> .env
+
             # Pull lates images
             docker-compose -f docker-compose.prod.yaml Pull
 
             # Run the docker-compose file with env variables
-            ADMIN_EMAIL=$ADMIN_EMAIL \
-            ADMIN_PASSWORD=$ADMIN_PASSWORD \
             docker-compose -f docker-compose.prod.yaml up -d
 
             # Clean up dangling images
